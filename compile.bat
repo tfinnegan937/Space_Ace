@@ -1,0 +1,1 @@
+docker run --volume "D:\Programming\CPE481_Space_Ace:/src" n64dev/n64sdk bash -c "cd /src && make"
