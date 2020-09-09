@@ -27,7 +27,7 @@ CODEFILES   = 	main.c stage00.c graphic.c gfxinit.c
 
 CODEOBJECTS =	$(CODEFILES:.c=.o)  $(NUSYSLIBDIR)/nusys.o
 
-DATAFILES   =	
+DATAFILES   =
 
 DATAOBJECTS =	$(DATAFILES:.c=.o)
 
@@ -44,7 +44,7 @@ $(CODESEGMENT):	$(CODEOBJECTS) Makefile
 		$(LD) -o $(CODESEGMENT) -r $(CODEOBJECTS) $(LDFLAGS)
 
 $(TARGETS):	$(OBJECTS)
-		$(MAKEROM) spec -I$(NUSYSINCDIR) -r $(TARGETS) -s 9 -e $(APP)
+		$(MAKEROM) spec -I$(NUSYSINCDIR) -r $(TARGETS) -s 32 -e $(APP)
 		makemask $(TARGETS)
 
 

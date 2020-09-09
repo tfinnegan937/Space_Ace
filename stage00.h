@@ -11,6 +11,8 @@ void drawSquare();
 void drawN64Logo();
 void drawSkybox();
 
+void updateSkyboxVertices(Vtx * output_vertices);
+
 #endif /* _STAGE00_H_ */
 
 

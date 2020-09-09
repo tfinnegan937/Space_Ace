@@ -8,6 +8,8 @@
 #include "stage00.h"
 #include "n64logo.h"
 #include "skybox.h"
+#include "space_texture.h"
+#include "red_texture.h"
 
 Vec3d cameraPos = {-200.0f, -200.0f, -200.0f};
 Vec3d cameraTarget = {-199, -199, -199};
@@ -383,27 +385,40 @@ void stage00(int pendingGfx)
 }
 
 void drawSkybox(){
-    gSPVertex(displayListPtr++, &(skybox_vertlist[0]), 16, 0);
+    //Load the texture
+    gSPClearGeometryMode(displayListPtr++, G_TEXTURE_GEN)
+    gSPTexture(displayListPtr++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPSetTextureFilter(displayListPtr++, G_TF_BILERP);
+    gDPSetTexturePersp(displayListPtr++, G_TP_PERSP);
+    gDPSetCombineMode(displayListPtr++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPSetTextureLUT(displayListPtr++, G_TT_NONE);
+    gDPLoadTextureBlock(displayListPtr++, space_texture, G_IM_FMT_RGBA, G_IM_SIZ_16b, 32, 32, 0, G_TX_WRAP, G_TX_WRAP,
+        5, 5, G_TX_NOLOD, G_TX_NOLOD);
+    gDPTileSync(displayListPtr++);
+    //Load the model
 
-    gDPSetCycleType(displayListPtr++, G_CYC_1CYCLE);
-    gDPSetRenderMode(displayListPtr++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
+    gDPSetCycleType(displayListPtr++, G_CYC_2CYCLE);
+    gDPSetRenderMode(displayListPtr++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
     gSPClearGeometryMode(displayListPtr++,0xFFFFFFFF);
-    gSPSetGeometryMode(displayListPtr++, G_SHADE | G_SHADING_SMOOTH | G_ZBUFFER);
+    gSPSetGeometryMode(displayListPtr++, G_SHADE | G_SHADING_SMOOTH | G_ZBUFFER | G_CULL_FRONT);
 
 
-    //Face 1
-    gSP2Triangles(displayListPtr++,0,1,2,0,0,2,3,0); // At w=-z
-    //Face 2
-    gSP2Triangles(displayListPtr++,4,5,6,0,4,6,7,0);// At w=+z
-    //Face 3
-    gSP2Triangles(displayListPtr++,8,9,12,0,9,12,13,0); // At w=-y
-    //Face4
-    gSP2Triangles(displayListPtr++,10, 11, 14, 0,11, 14, 15,0); //At w=+y
-    gSP2Triangles(displayListPtr++,2,5,6,0,2,5,9,0); //At w=+x
-    gSP2Triangles(displayListPtr++,7,8,11,0, 8,7,12,0); //At w=-x
-
+    gSPVertex(displayListPtr++, skybox_vertices + 0, 16, 0);
+    gSP1Triangle(displayListPtr++, 0, 1, 2, 0);
+    gSP1Triangle(displayListPtr++, 0, 2, 3, 0);
+    gSP1Triangle(displayListPtr++, 4, 5, 6, 0);
+    gSP1Triangle(displayListPtr++, 4, 6, 7, 0);
+    gSP1Triangle(displayListPtr++,8, 9, 10, 0);
+    gSP1Triangle(displayListPtr++,8, 10, 11, 0);
+    gSP1Triangle(displayListPtr++,12, 13, 14, 0);
+    gSP1Triangle(displayListPtr++,12, 14, 15, 0);
+    gSPVertex(displayListPtr++, skybox_vertices + 16, 8, 0);
+    gSP1Triangle(displayListPtr++,0, 1, 2, 0);
+    gSP1Triangle(displayListPtr++,0, 2, 3, 0);
+    gSP1Triangle(displayListPtr++,4, 5, 6, 0);
+    gSP1Triangle(displayListPtr++,4, 6, 7, 0);
 
 
     gDPPipeSync(displayListPtr++);
-
 }
+
