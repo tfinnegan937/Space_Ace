@@ -1,18 +1,12 @@
 
 #include <assert.h>
 #include <nusys.h>
-#include "gu.h"
 
 #include "graphic.h"
 #include "main.h"
 #include "stage00.h"
-#include "n64logo.h"
 #include "skybox.h"
-#include "space_texture.h"
-#include "red_texture.h"
 #include "space_texture_test.h"
-#include "sphere_skybox.h"
-#include "sphere_skybox.h"
 #include "star_particle.h"
 
 Vec3d cameraPos = {-200.0f, -200.0f, -200.0f};
@@ -65,11 +59,8 @@ float rollRotation[4][4] = {
 };
 
 
-// the positions of the squares we're gonna draw
 
 
-// this is a boolean but the older version of C used by the N64 compiler
-// (roughly C89); doesn't have a bool type, so we just use integers
 
 
 // the 'setup' function
@@ -89,20 +80,14 @@ void initStage00() {
 void updateGame00() {
   // read controller input from controller 1 (index 0)
   nuContDataGetEx(contdata, 0);
-  // We check if the 'A' Button was pressed using a bitwise AND with
-  // contdata[0].trigger and the A_BUTTON constant.
-  // The contdata[0].trigger property is set only for the frame that the button is
-  // initially pressed. The contdata[0].button property is similar, but stays on
-  // for the duration of the button press.
+
 
   float joystickMagnitude = sqrtf(contdata[0].stick_y * contdata[0].stick_y + contdata[0].stick_x * contdata[0].stick_x);
   if (contdata[0].button & A_BUTTON && (forwardVelocity < forwardMax)){
-    // when A button is pressed, reverse rotation direction
     forwardVelocity = forwardVelocity + forwardAcceleration;
   }
 
   if (contdata[0].button & B_BUTTON && (forwardVelocity > forwardMin)){
-    // when B button is held, change squares into n64 logos
     forwardVelocity = forwardVelocity - forwardAcceleration;
   }
 
@@ -130,15 +115,6 @@ void updateGame00() {
     pitch = 1;
     pitchDirection = contdata[0].stick_y / sqrtf(contdata[0].stick_y * contdata[0].stick_y);
   }
-
-
-
-  //Perform the transformations
-
-
-
-
-
 
   // update square rotations
 
@@ -264,20 +240,6 @@ void makeDL00() {
   );
 }
 
-
-// A static array of model vertex data.
-// This include the position (x,y,z); texture U,V coords (called S,T in the SDK)
-// and vertex color values in r,g,b,a form.
-// As this data will be read by the RCP via direct memory access, which is
-// required to be 16-byte aligned, it's a good idea to annotate it with the GCC
-// attribute `__attribute__((aligned (16)))`, to force it to be 16-byte aligned.
-
-
-
-
-// this is an example of rendering a model defined as a set of static display lists
-
-
 // the nusystem callback for the stage, called once per frame
 void stage00(int pendingGfx)
 {
@@ -297,11 +259,7 @@ void drawSkybox(){
     gDPSetTexturePersp(displayListPtr++, G_TP_PERSP);
     gDPSetCombineMode(displayListPtr++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPSetTextureLUT(displayListPtr++, G_TT_RGBA16);
-    //gDPSetTextureDetail(displayListPtr++, G_TD_DETAIL);
 
-    //Load the model
-
-    //gSPSetGeometryMode(displayListPtr++, G_TEXTURE_GEN);
     gDPSetCycleType(displayListPtr++, G_CYC_2CYCLE);
     gDPSetRenderMode(displayListPtr++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
     gSPClearGeometryMode(displayListPtr++,0xFFFFFFFF);
