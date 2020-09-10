@@ -50,8 +50,23 @@ void gfxClearCfb(void)
   // Clear the frame buffer  
   gDPSetColorImage(displayListPtr++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WD,
 		   osVirtualToPhysical(nuGfxCfb_ptr));
-  gDPSetFillColor(displayListPtr++, (GPACK_RGBA5551(0, 0, 0, 1) << 16 | 
+  gDPSetFillColor(displayListPtr++, (GPACK_RGBA5551(0, 0, 0, 1) << 16 |
 				GPACK_RGBA5551(0, 0, 0, 1)));
   gDPFillRectangle(displayListPtr++, 0, 0, SCREEN_WD-1, SCREEN_HT-1);
   gDPPipeSync(displayListPtr++);
+}
+
+void gfxSetBackgroundColor(void){
+    gSPClearGeometryMode(displayListPtr++, G_ZBUFFER);
+
+    gDPSetColorImage(displayListPtr++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WD,
+                     osVirtualToPhysical(nuGfxCfb_ptr));
+
+    gDPSetFillColor(displayListPtr++, (GPACK_RGBA5551(7, 20, 33, 1) << 16 |
+                                       GPACK_RGBA5551(7, 20, 33, 1)));
+
+    gDPFillRectangle(displayListPtr++, 0, 0, SCREEN_WD-1, SCREEN_HT-1);
+
+    gSPSetGeometryMode(displayListPtr, G_ZBUFFER);
+    gDPPipeSync(displayListPtr++);
 }

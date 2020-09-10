@@ -12,7 +12,7 @@
 #define MAX_DISPLAY_LIST_COMMANDS 2048
 // determines the number of matrices we allocate, because we need one for every
 // object we want to position in the world, for each graphics task
-#define MAX_OBJECTS 10
+#define MAX_OBJECTS 120
 
 #define FOVY 45
 #define ASPECT (f32)SCREEN_WD/(f32)SCREEN_HT
@@ -36,11 +36,13 @@ typedef struct GraphicsTask {
 } GraphicsTask;
 
 extern struct GraphicsTask graphicsTasks[MAX_GRAPHICS_TASKS];
+extern int transform_tail;
 extern Gfx * displayListPtr;
 
 extern GraphicsTask * gfxSwitchTask();
 extern void gfxRCPInit();
 extern void gfxClearCfb();
+extern void gfxSetBackgroundColor();
 
 extern Gfx setup_rdpstate[];
 extern Gfx setup_rspstate[];

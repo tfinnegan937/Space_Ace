@@ -23,7 +23,7 @@ TARGETS =	spaceace.n64
 
 HFILES =	graphic.h
 
-CODEFILES   = 	main.c stage00.c graphic.c gfxinit.c
+CODEFILES   = 	main.c stage00.c graphic.c gfxinit.c star_particle.c
 
 CODEOBJECTS =	$(CODEFILES:.c=.o)  $(NUSYSLIBDIR)/nusys.o
 
