@@ -7,7 +7,7 @@
 #define SCREEN_HT        240
 #define SCREEN_WD        320
 
-#define MAX_GRAPHICS_TASKS 2
+#define MAX_GRAPHICS_TASKS 10
 // The maximum length of the display list of one task  
 #define MAX_DISPLAY_LIST_COMMANDS 2048
 // determines the number of matrices we allocate, because we need one for every
@@ -17,7 +17,7 @@
 #define FOVY 45
 #define ASPECT (f32)SCREEN_WD/(f32)SCREEN_HT
 #define NEAR_PLANE 10
-#define FAR_PLANE 50000
+#define FAR_PLANE 3000
 
 // a 3d position, such as that of an object
 typedef struct Vec3d {

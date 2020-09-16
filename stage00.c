@@ -1,16 +1,17 @@
 
 #include <assert.h>
 #include <nusys.h>
-
+#include <ultra64.h>
 #include "graphic.h"
 #include "main.h"
 #include "stage00.h"
 #include "skybox.h"
-#include "space_texture_test.h"
-#include "star_particle.h"
-
-Vec3d cameraPos = {-200.0f, -200.0f, -200.0f};
-Vec3d cameraTarget = {-199, -199, -199};
+#include "cube_render.h"
+#include "debug.h"
+#include "testcube.h"
+#include "ufo.h"
+Vec3d cameraPos = {0.0f, 0.0f, -50.0f};
+Vec3d cameraTarget = {0, 0, 0};
 Vec3d cameraForward = {0.0f, 0.0f, 1.0f};
 Vec3d cameraEulerAngles = {0.0f, 0.0f, 0.0f};
 Vec3d cameraUp = {0.0f, 1.0f, 0.0f};
@@ -21,6 +22,8 @@ char pitch = 0;
 char roll = 0;
 char yaw = 0;
 
+char skyboxOn = 1;
+
 char yawDirection = 1;
 char rollDirection = 1;
 char pitchDirection = 1;
@@ -30,8 +33,8 @@ float pitchVelocity = 127;
 float rollVelocity = 127;
 
 float forwardVelocity = 0;
-float forwardMin = -100;
-float forwardMax = 100;
+float forwardMin = -200;
+float forwardMax = 500;
 
 float forwardAcceleration = 1;
 
@@ -104,16 +107,23 @@ void updateGame00() {
     roll = 1;
     rollDirection = 1;
   }
+    if(contdata[0].trigger & D_CBUTTONS){
+        skyboxOn = skyboxOn * -1;
+    }
   yaw = 0;
-  if(contdata[0].stick_x !=0 && (joystickMagnitude >=40)){
-
+  int stick_x_mag = sqrtf(contdata[0].stick_x * contdata[0].stick_x);
+  int stick_y_mag = sqrtf(contdata[0].stick_y * contdata[0].stick_y);
+  if(contdata[0].stick_x !=0 && (stick_x_mag > 40)){
+      //debug_printf("x: %x\n", contdata[0].stick_x);
       yaw = 1;
       yawDirection = contdata[0].stick_x / sqrtf(contdata[0].stick_x * contdata[0].stick_x);
   }
   pitch = 0;
-  if(contdata[0].stick_y !=0 && (joystickMagnitude >=40)){
+  if(contdata[0].stick_y !=0 && (stick_y_mag > 40)){
     pitch = 1;
-    pitchDirection = contdata[0].stick_y / sqrtf(contdata[0].stick_y * contdata[0].stick_y);
+      //debug_printf("y: %x\n", contdata[0].stick_y);
+
+      pitchDirection = contdata[0].stick_y / sqrtf(contdata[0].stick_y * contdata[0].stick_y);
   }
 
   // update square rotations
@@ -132,7 +142,7 @@ void updateGame00() {
 void makeDL00() {
   unsigned short perspNorm;
   GraphicsTask * gfxTask;
-  
+
   // switch the current graphics task
   // also updates the displayListPtr global variable
   gfxTask = gfxSwitchTask(); 
@@ -143,10 +153,12 @@ void makeDL00() {
 
   // clear the color framebuffer and Z-buffer, similar to glClear()
   gfxClearCfb();
-  gfxSetBackgroundColor();
-  drawSkybox();
+  //gfxSetBackgroundColor();
 
-  //Perform the camera vector rotations
+
+    //debug_printf("Rom initialized");
+
+    //Perform the camera vector rotations
   if(yaw) {
       guRotateF(yawRotation, -1 * yawVelocity * yawDirection * .016, cameraUp.x, cameraUp.y, cameraUp.z);
       guMtxXFMF(yawRotation, cameraForward.x, cameraForward.y, cameraForward.z,
@@ -210,8 +222,36 @@ void makeDL00() {
     // similarly this combination means "replace the modelview matrix with this new matrix"
     G_MTX_MODELVIEW | G_MTX_NOPUSH | G_MTX_LOAD
   );
+  //gSPDisplayList(displayListPtr++, cube_dl);
+  //gSPDisplayList(displayListPtr++, cube_dl);
+
+    /*for(int i = 0; i < 4; i ++){
+        for(int j = 0; j < 4; j++){
+            debug_printf("%f ", skyboxTranslation[i][j]);
+
+            if(j % 4 == 0 && j % 4 != 2){
+                debug_printf("\n");
+            }
+        }
+    }*/
+    //debug_printf("\n");
 
 
+    //guTranslate(&skyboxTranslation, cameraPos.x, cameraPos.y, cameraPos.z);
+    //gSPMatrix(displayListPtr++, &skyboxTranslation, G_MTX_MODELVIEW | G_MTX_PUSH);
+    guTranslate(&skyboxTranslation, cameraPos.x, cameraPos.y, cameraPos.z);
+    gSPMatrix(displayListPtr++, &skyboxTranslation, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
+    if(skyboxOn > -1) {
+        gSPDisplayList(displayListPtr++, skybox_dl);
+        debug_printf("draw_skybox");
+    }
+    //gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
+    gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
+    gSPDisplayList(displayListPtr++, ufo_Cube_mesh);
+    //gSPDisplayList(displayListPtr++, Wtx_speaker);
+
+
+    gDPPipeSync(displayListPtr++);
   // mark the end of the display list
   gDPFullSync(displayListPtr++);
   gSPEndDisplayList(displayListPtr++);
@@ -253,28 +293,32 @@ void stage00(int pendingGfx)
 }
 
 void drawSkybox(){
-    //Load the texture
+    /*guTranslateF(skyboxTranslation, cameraPos.x, cameraPos.y, cameraPos.z);
+    gSPMatrix(displayListPtr++, &skyboxTranslation, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
+    gSPDisplayList(displayListPtr++, cube_dl);
+    gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);*/
+
+    /*gDPLoadSync(displayListPtr++);
     gSPTexture(displayListPtr++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
     gDPSetTextureFilter(displayListPtr++, G_TF_POINT);
     gDPSetTexturePersp(displayListPtr++, G_TP_PERSP);
-    gDPSetCombineMode(displayListPtr++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPSetCombineMode(displayListPtr++, G_CC_DECALRGB, G_CC_DECALRGB);
     gDPSetTextureLUT(displayListPtr++, G_TT_RGBA16);
 
     gDPSetCycleType(displayListPtr++, G_CYC_2CYCLE);
-    gDPSetRenderMode(displayListPtr++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+    gDPSetRenderMode(displayListPtr++, G_RM_AA_ZB_OPA_DECAL, G_RM_AA_ZB_OPA_DECAL2);
     gSPClearGeometryMode(displayListPtr++,0xFFFFFFFF);
-    gSPSetGeometryMode(displayListPtr++, G_SHADE | G_SHADING_SMOOTH | G_ZBUFFER | G_CULL_FRONT);
+    gSPSetGeometryMode(displayListPtr++, G_SHADE | G_SHADING_SMOOTH | G_ZBUFFER);
     //Translate the skybox with the camera
     guTranslate(&skyboxTranslation, cameraPos.x, cameraPos.y, cameraPos.z);
 
 
-    gSPMatrix(displayListPtr++, OS_K0_TO_PHYSICAL(&skyboxTranslation), G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
+    gSPMatrix(displayListPtr++, &skyboxTranslation, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
     gDPLoadTLUT_pal16(displayListPtr++, 0, tileable_space_texture_tlut);
     gDPLoadTextureBlock_4b(displayListPtr++, space_texture, G_IM_FMT_CI, 64, 64, 0, G_TX_WRAP, G_TX_WRAP,
-                        6, 6, 0, 0);
-    gDPTileSync(displayListPtr++);
-
-
+                           6, 6, 0, 0);
+    //gDPTileSync(displayListPtr++);
+    //gdPLoadSync(displayListPtr++);
     gSPVertex(displayListPtr++, skybox_vertices + 0, 16, 0);
     gSP1Triangle(displayListPtr++, 0, 1, 2, 0);
     gSP1Triangle(displayListPtr++, 0, 2, 3, 0);
@@ -307,6 +351,6 @@ void drawSkybox(){
 
 
     gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
-    gDPPipeSync(displayListPtr++);
+    gDPPipeSync(displayListPtr++);*/
 }
 

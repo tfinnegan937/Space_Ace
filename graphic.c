@@ -62,8 +62,8 @@ void gfxSetBackgroundColor(void){
     gDPSetColorImage(displayListPtr++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WD,
                      osVirtualToPhysical(nuGfxCfb_ptr));
 
-    gDPSetFillColor(displayListPtr++, (GPACK_RGBA5551(7, 20, 33, 1) << 16 |
-                                       GPACK_RGBA5551(7, 20, 33, 1)));
+    gDPSetFillColor(displayListPtr++, (GPACK_RGBA5551(255, 0, 0, 1) << 16 |
+                                       GPACK_RGBA5551(255, 0, 0, 1)));
 
     gDPFillRectangle(displayListPtr++, 0, 0, SCREEN_WD-1, SCREEN_HT-1);
 

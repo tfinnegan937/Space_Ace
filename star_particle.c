@@ -5,7 +5,6 @@
 #include <nusys.h>
 #include <ultra64.h>
 #include "graphic.h"
-
 int star_particle_count = 0;
 
 float translation_matrix[4][4] = {
@@ -22,11 +21,6 @@ float rotation_matrix[4][4] = {
         {0, 0, 0, 1}
 };
 
-typedef struct ProjectionOutput{
-    float x;
-    float y;
-    float z;
-} ProjectionOutput;
 
 Vec3d axisOfRotation = {
         0.0f,

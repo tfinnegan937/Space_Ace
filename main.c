@@ -1,19 +1,18 @@
 
 #include <nusys.h>
 #include "stage00.h"
-
-
+#include "debug.h"
 NUContData  contdata[1]; // storage for controller 1 inputs
 
 void mainproc(void)
 {
   // initialize the graphics system
   nuGfxInit();
-
   // initialize the controller manager
   nuContInit();
+  debug_initialize();
 
-  // initialize the level
+    // initialize the level
   initStage00();
 
   // set the update+draw callback to be called every frame

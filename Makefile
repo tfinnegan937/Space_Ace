@@ -13,7 +13,7 @@ INC = /usr/include/n64
 LCDEFS =	-DNU_DEBUG -DF3DEX_GBI_2
 LCINCS =	-I. -I$(NUSYSINCDIR) -I$(ROOT)/usr/include/PR 
 LCOPTS =	-G 0
-LDFLAGS = $(MKDEPOPT) -L$(LIB) -L$(NUSYSLIBDIR) -lnusys_d -lultra_d -L$(N64_LIBGCCDIR) -lgcc
+LDFLAGS = $(MKDEPOPT) -L$(LIB) -L$(NUSYSLIBDIR) -lnusys_d -lultra_d -L$(N64_LIBGCCDIR) -lgcc -L$(N64_NEWLIBDIR) -lc
 
 OPTIMIZER =	-g
 
@@ -21,9 +21,9 @@ APP =		spaceace.out
 
 TARGETS =	spaceace.n64
 
-HFILES =	graphic.h
+HFILES =	graphic.h speaker.h space_texture_test.h
 
-CODEFILES   = 	main.c stage00.c graphic.c gfxinit.c star_particle.c
+CODEFILES   = 	main.c stage00.c graphic.c gfxinit.c debug.c usb.c
 
 CODEOBJECTS =	$(CODEFILES:.c=.o)  $(NUSYSLIBDIR)/nusys.o
 
@@ -44,7 +44,7 @@ $(CODESEGMENT):	$(CODEOBJECTS) Makefile
 		$(LD) -o $(CODESEGMENT) -r $(CODEOBJECTS) $(LDFLAGS)
 
 $(TARGETS):	$(OBJECTS)
-		$(MAKEROM) spec -I$(NUSYSINCDIR) -r $(TARGETS) -s 32 -e $(APP)
+		$(MAKEROM) spec -I$(NUSYSINCDIR) -r $(TARGETS) -s 9 -e $(APP)
 		makemask $(TARGETS)
 
 
