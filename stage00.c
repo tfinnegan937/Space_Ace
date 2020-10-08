@@ -9,7 +9,7 @@
 #include "cube_render.h"
 #include "debug.h"
 #include "testcube.h"
-#include "ufo.h"
+#include "meteor.h"
 Vec3d cameraPos = {0.0f, 0.0f, -50.0f};
 Vec3d cameraTarget = {0, 0, 0};
 Vec3d cameraForward = {0.0f, 0.0f, 1.0f};
@@ -61,8 +61,18 @@ float rollRotation[4][4] = {
         {0.0f, 0.0f, 0.0f, 1.0f}
 };
 
+Mtx curMeteorRotation;
 
+Mtx curMeteorTranslation;
 
+#define METEOR_COUNT 100
+struct Meteor MeteorList[METEOR_COUNT];
+
+Mtx MeteorTransformationStack[METEOR_COUNT];
+
+int test_rotations[METEOR_COUNT];
+
+Vec3d test_positions[METEOR_COUNT];
 
 
 
@@ -76,6 +86,8 @@ void initStage00() {
   // In the older version of C used by the N64 compiler (roughly C89); variables
   // must be declared at the top of a function or block scope. This is an example
   // of using block scope to declare a variable in the middle of a function.
+
+  generateMeteors();
 
 }
 
@@ -136,6 +148,9 @@ void updateGame00() {
   cameraTarget.x = cameraPos.x + cameraForward.x;
   cameraTarget.y = cameraPos.y + cameraForward.y;
   cameraTarget.z = cameraPos.z + cameraForward.z;
+
+  updateMeteors();
+
 }
 
 // the 'draw' function
@@ -243,13 +258,13 @@ void makeDL00() {
     gSPMatrix(displayListPtr++, &skyboxTranslation, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
     if(skyboxOn > -1) {
         gSPDisplayList(displayListPtr++, skybox_dl);
-        debug_printf("draw_skybox");
     }
-    //gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
     gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
-    gSPDisplayList(displayListPtr++, ufo_Cube_mesh);
-    //gSPDisplayList(displayListPtr++, Wtx_speaker);
 
+    //debug_printf("Start list \n");
+
+
+    drawMeteors();
 
     gDPPipeSync(displayListPtr++);
   // mark the end of the display list
@@ -354,3 +369,51 @@ void drawSkybox(){
     gDPPipeSync(displayListPtr++);*/
 }
 
+void generateMeteors(){
+    //Generate values for each meteor.
+    for(int i = 0; i < METEOR_COUNT; i++){
+        test_positions[i].x = RAND(6000) - 3000;
+        test_positions[i].y = RAND(6000) - 3000;
+        test_positions[i].z = RAND(6000) - 3000;
+
+        MeteorList[i].Turning_Axis.x = i * 100; //Range 1 - 101 inclusive, shifted to 0 - 100, normalized
+        MeteorList[i].Turning_Axis.y = i * 100;
+        MeteorList[i].Turning_Axis.z = i * 100;
+
+        test_rotations[i] = 45;
+        //debug_printf("Angle of rotation: %i\n", test_rotations[i]);
+        //debug_printf("X: %f\n", test_positions[i].x);
+
+
+    }
+}
+
+void updateMeteors(){
+    for(int i = 0; i < METEOR_COUNT; i++){
+        test_rotations[i] = ((test_rotations[i] + 1) % 360); //Rotate the meteors.
+    }
+}
+
+
+
+void drawMeteors(){
+
+    gSPDisplayList(displayListPtr++, asteroid_material);
+    for(int i = 0; i < METEOR_COUNT; i++){
+
+        Vec3d curMeteor = test_positions[i];
+
+
+
+        //debug_printf("X: %f Y: %f Z %f \n", curMeteor.x, curMeteor.y, curMeteor.z);
+        //debug_printf("Angle of rotation: %f\n", curMeteor.rotation_angle);
+        guPosition(&MeteorTransformationStack[i], test_rotations[i], 0, 0, 2,
+                   curMeteor.x, curMeteor.y, curMeteor.z);
+        gSPMatrix(displayListPtr++, OS_K0_TO_PHYSICAL(&MeteorTransformationStack[i]), G_MTX_MODELVIEW | G_MTX_PUSH);
+        gSPDisplayList(displayListPtr++, asteroid_Sphere_mesh);
+
+        gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
+
+    }
+
+}

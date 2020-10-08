@@ -17,7 +17,7 @@
 #define FOVY 45
 #define ASPECT (f32)SCREEN_WD/(f32)SCREEN_HT
 #define NEAR_PLANE 10
-#define FAR_PLANE 3000
+#define FAR_PLANE 6000
 
 // a 3d position, such as that of an object
 typedef struct Vec3d {

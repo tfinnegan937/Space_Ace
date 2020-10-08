@@ -6,13 +6,14 @@ include $(ROOT)/usr/include/make/PRdefs
 NUSYSINCDIR  = /usr/include/n64/nusys
 NUSYSLIBDIR  = /usr/lib/n64/nusys
 
-LIB = /usr/lib/n64
+LIB = $(ROOT)/usr/lib
 LPR = $(LIB)/PR
-INC = /usr/include/n64
+INC = $(ROOT)/usr/include
 
 LCDEFS =	-DNU_DEBUG -DF3DEX_GBI_2
-LCINCS =	-I. -I$(NUSYSINCDIR) -I$(ROOT)/usr/include/PR 
+LCINCS =	-I. -I$(NUSYSINCDIR) -I$(ROOT)/usr/include/PR
 LCOPTS =	-G 0
+LDIRT  =    $(APP)
 LDFLAGS = $(MKDEPOPT) -L$(LIB) -L$(NUSYSLIBDIR) -lnusys_d -lultra_d -L$(N64_LIBGCCDIR) -lgcc -L$(N64_NEWLIBDIR) -lc
 
 OPTIMIZER =	-g

@@ -13,6 +13,11 @@ void drawSkybox();
 
 void updateSkyboxVertices(Vtx * output_vertices);
 
+void generateMeteors();
+
+void updateMeteors();
+void drawMeteors();
+
 #endif /* _STAGE00_H_ */
 
 

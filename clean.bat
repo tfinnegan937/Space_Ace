@@ -1,1 +1,0 @@
-docker run --volume "D:\Programming\Space_Ace:/src" n64dev/n64sdk bash -c "cd /src && make clean"
