@@ -26,23 +26,25 @@ int isColliding(float radius1, float radius2, Vec3d pos1, Vec3d pos2){
     return 0;
 }
 
-typedef struct VelocityOut {
+typedef struct VelocityOut { //Structure for returning the velocities of both colliding objects
     Vec3d first;
     Vec3d second;
 } VelocityOut;
 
 
-//WORK IN PROGRESS. DO NOT USE
+//WORK IN PROGRESS. USING THIS GUIDE
+// https://studiofreya.com/3d-math-and-physics/simple-sphere-sphere-collision-detection-and-collision-response/
+extern VelocityOut respondCollision(float playerRad, Vec3d playerPos, Vec3d playerVel, float playerMass,
+                             float objectRad, Vec3d objectPos, Vec3d objectVel, float objectMass);
+
 VelocityOut respondCollision(float playerRad, Vec3d playerPos, Vec3d playerVel, float playerMass,
                      float objectRad, Vec3d objectPos, Vec3d objectVel, float objectMass){
-    //Create the basis
     Vec3d xBasis = {
             objectPos.x - playerPos.x,
             objectPos.y - playerPos.y,
             objectPos.z - playerPos.z
     };
 
-    //Normalize the basis
     float xBaseMag = sqrtf(xBasis.x * xBasis.x + xBasis.y * xBasis.y + xBasis.z * xBasis.z);
 
     xBasis.x = xBasis.x / xBaseMag;

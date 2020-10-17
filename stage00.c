@@ -247,23 +247,7 @@ void makeDL00() {
     // similarly this combination means "replace the modelview matrix with this new matrix"
     G_MTX_MODELVIEW | G_MTX_NOPUSH | G_MTX_LOAD
   );
-  //gSPDisplayList(displayListPtr++, cube_dl);
-  //gSPDisplayList(displayListPtr++, cube_dl);
 
-    /*for(int i = 0; i < 4; i ++){
-        for(int j = 0; j < 4; j++){
-            debug_printf("%f ", skyboxTranslation[i][j]);
-
-            if(j % 4 == 0 && j % 4 != 2){
-                debug_printf("\n");
-            }
-        }
-    }*/
-    //debug_printf("\n");
-
-
-    //guTranslate(&skyboxTranslation, cameraPos.x, cameraPos.y, cameraPos.z);
-    //gSPMatrix(displayListPtr++, &skyboxTranslation, G_MTX_MODELVIEW | G_MTX_PUSH);
     guTranslate(&skyboxTranslation, cameraPos.x, cameraPos.y, cameraPos.z);
     gSPMatrix(displayListPtr++, &skyboxTranslation, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
     if(skyboxOn > -1) {
@@ -319,67 +303,7 @@ void stage00(int pendingGfx)
   updateGame00();
 }
 
-void drawSkybox(){
-    /*guTranslateF(skyboxTranslation, cameraPos.x, cameraPos.y, cameraPos.z);
-    gSPMatrix(displayListPtr++, &skyboxTranslation, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
-    gSPDisplayList(displayListPtr++, cube_dl);
-    gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);*/
 
-    /*gDPLoadSync(displayListPtr++);
-    gSPTexture(displayListPtr++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-    gDPSetTextureFilter(displayListPtr++, G_TF_POINT);
-    gDPSetTexturePersp(displayListPtr++, G_TP_PERSP);
-    gDPSetCombineMode(displayListPtr++, G_CC_DECALRGB, G_CC_DECALRGB);
-    gDPSetTextureLUT(displayListPtr++, G_TT_RGBA16);
-
-    gDPSetCycleType(displayListPtr++, G_CYC_2CYCLE);
-    gDPSetRenderMode(displayListPtr++, G_RM_AA_ZB_OPA_DECAL, G_RM_AA_ZB_OPA_DECAL2);
-    gSPClearGeometryMode(displayListPtr++,0xFFFFFFFF);
-    gSPSetGeometryMode(displayListPtr++, G_SHADE | G_SHADING_SMOOTH | G_ZBUFFER);
-    //Translate the skybox with the camera
-    guTranslate(&skyboxTranslation, cameraPos.x, cameraPos.y, cameraPos.z);
-
-
-    gSPMatrix(displayListPtr++, &skyboxTranslation, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
-    gDPLoadTLUT_pal16(displayListPtr++, 0, tileable_space_texture_tlut);
-    gDPLoadTextureBlock_4b(displayListPtr++, space_texture, G_IM_FMT_CI, 64, 64, 0, G_TX_WRAP, G_TX_WRAP,
-                           6, 6, 0, 0);
-    //gDPTileSync(displayListPtr++);
-    //gdPLoadSync(displayListPtr++);
-    gSPVertex(displayListPtr++, skybox_vertices + 0, 16, 0);
-    gSP1Triangle(displayListPtr++, 0, 1, 2, 0);
-    gSP1Triangle(displayListPtr++, 0, 2, 3, 0);
-
-
-    gSP1Triangle(displayListPtr++, 4, 5, 6, 0);
-    gSP1Triangle(displayListPtr++, 4, 6, 7, 0);
-
-
-
-    gSP1Triangle(displayListPtr++,8, 9, 10, 0);
-    gSP1Triangle(displayListPtr++,8, 10, 11, 0);
-
-
-    gSP1Triangle(displayListPtr++,12, 13, 14, 0);
-    gSP1Triangle(displayListPtr++,12, 14, 15, 0);
-
-
-
-    gSPVertex(displayListPtr++, skybox_vertices + 16, 8, 0);
-    gSP1Triangle(displayListPtr++,0, 1, 2, 0);
-    gSP1Triangle(displayListPtr++,0, 2, 3, 0);
-
-
-
-    gSP1Triangle(displayListPtr++,4, 5, 6, 0);
-    gSP1Triangle(displayListPtr++,4, 6, 7, 0);
-
-
-
-
-    gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
-    gDPPipeSync(displayListPtr++);*/
-}
 
 void generateMeteors(){
     //Generate values for each meteor.
