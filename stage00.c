@@ -10,6 +10,8 @@
 #include "debug.h"
 #include "testcube.h"
 #include "meteor.h"
+#include "collisionmath.h"
+
 Vec3d cameraPos = {0.0f, 0.0f, -50.0f};
 Vec3d cameraTarget = {0, 0, 0};
 Vec3d cameraForward = {0.0f, 0.0f, 1.0f};
@@ -86,7 +88,6 @@ void initStage00() {
   // In the older version of C used by the N64 compiler (roughly C89); variables
   // must be declared at the top of a function or block scope. This is an example
   // of using block scope to declare a variable in the middle of a function.
-
   generateMeteors();
 
 }
@@ -144,6 +145,15 @@ void updateGame00() {
   cameraPos.x = cameraPos.x + (cameraForward.x * forwardVelocity * .016);
   cameraPos.y = cameraPos.y + (cameraForward.y * forwardVelocity * .016);
   cameraPos.z = cameraPos.z + (cameraForward.z * forwardVelocity * .016);
+
+  //Detect collisions
+
+  for(int i = 0; i < METEOR_COUNT; i++){
+      float meteorRadius = MeteorList[i].radius * MeteorList[i].scale;
+      if(isColliding(50, meteorRadius, cameraPos, MeteorList[i].position)){
+          forwardVelocity = 0;
+      }
+  }
 
   cameraTarget.x = cameraPos.x + cameraForward.x;
   cameraTarget.y = cameraPos.y + cameraForward.y;
@@ -261,13 +271,15 @@ void makeDL00() {
     }
     gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
 
-    //debug_printf("Start list \n");
 
 
     drawMeteors();
 
     gDPPipeSync(displayListPtr++);
-  // mark the end of the display list
+    //debug_printf("%i FPS\n", nuScGetFrameRate());
+
+
+    // mark the end of the display list
   gDPFullSync(displayListPtr++);
   gSPEndDisplayList(displayListPtr++);
 
@@ -290,7 +302,7 @@ void makeDL00() {
   nuGfxTaskStart(
     gfxTask->displayList,
     (int)(displayListPtr - gfxTask->displayList) * sizeof (Gfx),
-    NU_GFX_UCODE_F3DEX, // load the 'F3DEX' version graphics microcode, which runs on the RCP to process this display list
+    NU_GFX_UCODE_F3DEX2, // load the 'F3DEX' version graphics microcode, which runs on the RCP to process this display list
     NU_SC_SWAPBUFFER // tells NuSystem to immediately display the frame on screen after the RCP finishes rendering it
   );
 }
@@ -372,15 +384,17 @@ void drawSkybox(){
 void generateMeteors(){
     //Generate values for each meteor.
     for(int i = 0; i < METEOR_COUNT; i++){
-        test_positions[i].x = RAND(6000) - 3000;
-        test_positions[i].y = RAND(6000) - 3000;
-        test_positions[i].z = RAND(6000) - 3000;
+        MeteorList[i].position.x = RAND(6000) - 3000;
+        MeteorList[i].position.y = RAND(6000) - 3000;
+        MeteorList[i].position.z = RAND(6000) - 3000;
 
-        MeteorList[i].Turning_Axis.x = i * 100; //Range 1 - 101 inclusive, shifted to 0 - 100, normalized
-        MeteorList[i].Turning_Axis.y = i * 100;
-        MeteorList[i].Turning_Axis.z = i * 100;
+        MeteorList[i].Turning_Axis.x = RAND(2) - 1; //Range 1 - 101 inclusive, shifted to 0 - 100, normalized
+        MeteorList[i].Turning_Axis.y = RAND(2) - 1;
+        MeteorList[i].Turning_Axis.z = RAND(2) - 1;
 
-        test_rotations[i] = 45;
+        MeteorList[i].rotation_angle = 13;
+        MeteorList[i].scale = RAND(3);
+        MeteorList[i].radius = 215;
         //debug_printf("Angle of rotation: %i\n", test_rotations[i]);
         //debug_printf("X: %f\n", test_positions[i].x);
 
@@ -390,7 +404,7 @@ void generateMeteors(){
 
 void updateMeteors(){
     for(int i = 0; i < METEOR_COUNT; i++){
-        test_rotations[i] = ((test_rotations[i] + 1) % 360); //Rotate the meteors.
+        MeteorList[i].rotation_angle = ((MeteorList[i].rotation_angle + 1) % 360); //Rotate the meteors.
     }
 }
 
@@ -401,14 +415,19 @@ void drawMeteors(){
     gSPDisplayList(displayListPtr++, asteroid_material);
     for(int i = 0; i < METEOR_COUNT; i++){
 
-        Vec3d curMeteor = test_positions[i];
+        struct Meteor curMeteor = MeteorList[i];
 
 
 
         //debug_printf("X: %f Y: %f Z %f \n", curMeteor.x, curMeteor.y, curMeteor.z);
         //debug_printf("Angle of rotation: %f\n", curMeteor.rotation_angle);
-        guPosition(&MeteorTransformationStack[i], test_rotations[i], 0, 0, 2,
-                   curMeteor.x, curMeteor.y, curMeteor.z);
+
+        int rotation_x = curMeteor.Turning_Axis.x * curMeteor.rotation_angle;
+        int rotation_y = curMeteor.Turning_Axis.y * curMeteor.rotation_angle;
+        int rotation_z = curMeteor.Turning_Axis.z * curMeteor.rotation_angle;
+
+        guPosition(&MeteorTransformationStack[i], rotation_x, rotation_y, rotation_z, curMeteor.scale,
+                   curMeteor.position.x, curMeteor.position.y, curMeteor.position.z);
         gSPMatrix(displayListPtr++, OS_K0_TO_PHYSICAL(&MeteorTransformationStack[i]), G_MTX_MODELVIEW | G_MTX_PUSH);
         gSPDisplayList(displayListPtr++, asteroid_Sphere_mesh);
 

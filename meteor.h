@@ -186,7 +186,60 @@ Gfx asteroid_Sphere_mesh_tri_0[] = {
         gsSPEndDisplayList(),
 };
 
+Vtx low_res_asteroid_Sphere_mesh_vtx_0[32] = {
+        {{{209, -42, 0},0, {496, 560},{0x44, 0xAD, 0x44, 0xFF}}},
+        {{{0, -42, 209},0, {240, 560},{0x44, 0xAD, 0x44, 0xFF}}},
+        {{{0, -213, 0},0, {672, 1008},{0x44, 0xAD, 0x44, 0xFF}}},
+        {{{0, -213, 0},0, {160, 1008},{0xBC, 0xAD, 0xBC, 0xFF}}},
+        {{{-209, -42, 0},0, {-16, 560},{0xBC, 0xAD, 0xBC, 0xFF}}},
+        {{{0, -42, -209},0, {752, 560},{0xBC, 0xAD, 0xBC, 0xFF}}},
+        {{{0, -42, 209},0, {240, 560},{0xBC, 0xAD, 0x44, 0xFF}}},
+        {{{-209, -42, 0},0, {-16, 560},{0xBC, 0xAD, 0x44, 0xFF}}},
+        {{{0, -213, 0},0, {416, 1008},{0xBC, 0xAD, 0x44, 0xFF}}},
+        {{{0, -42, -209},0, {752, 560},{0x44, 0xAD, 0xBC, 0xFF}}},
+        {{{209, -42, 0},0, {496, 560},{0x44, 0xAD, 0xBC, 0xFF}}},
+        {{{0, -213, 0},0, {928, 1008},{0x44, 0xAD, 0xBC, 0xFF}}},
+        {{{209, -42, 0},0, {496, 560},{0x51, 0x36, 0xAF, 0xFF}}},
+        {{{0, -42, -209},0, {752, 560},{0x51, 0x36, 0xAF, 0xFF}}},
+        {{{0, 209, -42},0, {752, 48},{0x51, 0x36, 0xAF, 0xFF}}},
+        {{{42, 209, 0},0, {496, 48},{0x51, 0x36, 0xAF, 0xFF}}},
+        {{{-42, 209, 0},0, {1008, 48},{0xAF, 0x36, 0xAF, 0xFF}}},
+        {{{0, 209, -42},0, {752, 48},{0xAF, 0x36, 0xAF, 0xFF}}},
+        {{{0, -42, -209},0, {752, 560},{0xAF, 0x36, 0xAF, 0xFF}}},
+        {{{-209, -42, 0},0, {1008, 560},{0xAF, 0x36, 0xAF, 0xFF}}},
+        {{{42, 209, 0},0, {496, 48},{0x0, 0x7F, 0x0, 0xFF}}},
+        {{{0, 209, -42},0, {752, 48},{0x0, 0x7F, 0x0, 0xFF}}},
+        {{{-42, 209, 0},0, {1008, 48},{0x0, 0x7F, 0x0, 0xFF}}},
+        {{{0, 209, 42},0, {240, 48},{0x0, 0x7F, 0x0, 0xFF}}},
+        {{{0, -42, 209},0, {240, 560},{0x51, 0x36, 0x51, 0xFF}}},
+        {{{209, -42, 0},0, {496, 560},{0x51, 0x36, 0x51, 0xFF}}},
+        {{{42, 209, 0},0, {496, 48},{0x51, 0x36, 0x51, 0xFF}}},
+        {{{0, 209, 42},0, {240, 48},{0x51, 0x36, 0x51, 0xFF}}},
+        {{{-209, -42, 0},0, {1008, 560},{0xAF, 0x36, 0x51, 0xFF}}},
+        {{{0, -42, 209},0, {240, 560},{0xAF, 0x36, 0x51, 0xFF}}},
+        {{{0, 209, 42},0, {240, 48},{0xAF, 0x36, 0x51, 0xFF}}},
+        {{{-42, 209, 0},0, {1008, 48},{0xAF, 0x36, 0x51, 0xFF}}},
+};
 
+Gfx low_res_asteroid_Sphere_mesh_tri_0[] = {
+        gsSPVertex(low_res_asteroid_Sphere_mesh_vtx_0 + 0, 16, 0),
+        gsSP1Triangle(0, 1, 2, 0),
+        gsSP1Triangle(3, 4, 5, 0),
+        gsSP1Triangle(6, 7, 8, 0),
+        gsSP1Triangle(9, 10, 11, 0),
+        gsSP1Triangle(12, 13, 14, 0),
+        gsSP1Triangle(12, 14, 15, 0),
+        gsSPVertex(low_res_asteroid_Sphere_mesh_vtx_0 + 16, 16, 0),
+        gsSP1Triangle(0, 1, 2, 0),
+        gsSP1Triangle(0, 2, 3, 0),
+        gsSP1Triangle(4, 5, 6, 0),
+        gsSP1Triangle(4, 6, 7, 0),
+        gsSP1Triangle(8, 9, 10, 0),
+        gsSP1Triangle(8, 10, 11, 0),
+        gsSP1Triangle(12, 13, 14, 0),
+        gsSP1Triangle(12, 14, 15, 0),
+        gsSPEndDisplayList(),
+};
 
 
 Gfx asteroid_material[] = {
@@ -194,8 +247,8 @@ Gfx asteroid_material[] = {
         gsSPClearGeometryMode(0xFFFFFFFF),
         gsDPSetCombineMode(G_CC_DECALRGB, G_CC_DECALRGB),
         gsDPSetRenderMode(G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF),
-        gsSPSetGeometryMode(G_TEXTURE_GEN | G_SHADE | G_SHADING_SMOOTH | G_ZBUFFER | G_CULL_BACK),
-        gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
+        gsSPSetGeometryMode(G_SHADE | G_ZBUFFER | G_CULL_BACK),
+        gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, 1),
         gsDPSetTextureLUT(G_TT_RGBA16),
         gsDPLoadTLUT_pal16(0, dirt_texture_tlut),
         gsDPLoadTextureBlock_4b(dirt_texture, G_IM_FMT_CI, 64, 64, 0,
@@ -211,9 +264,7 @@ Gfx asteroid_material[] = {
 
 
 Gfx asteroid_Sphere_mesh[] = {
-        gsDPPipeSync(),
         gsSPDisplayList(asteroid_Sphere_mesh_tri_0),
-        gsDPPipeSync(),
         gsSPEndDisplayList(),
 };
 
@@ -221,5 +272,7 @@ struct Meteor{
     Vec3d position;
     Vec3d Turning_Axis;
     int rotation_angle;
+    int scale;
+    float radius;
 };
 #endif //SPACE_ACE_METEOR_H
