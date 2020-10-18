@@ -26,7 +26,7 @@ int isColliding(float radius1, float radius2, Vec3d pos1, Vec3d pos2){
     return 0;
 }
 
-typedef struct VelocityOut { //Structure for returning the velocities of both colliding objects
+typedef struct VelocityOut { //Structure for returning the new velocities of both colliding objects
     Vec3d first;
     Vec3d second;
 } VelocityOut;

@@ -38,7 +38,13 @@ float forwardVelocity = 0;
 float forwardMin = -200;
 float forwardMax = 500;
 
-float forwardAcceleration = 1;
+Vec3d playerVelocity = {
+        0,
+        0,
+        0
+};
+
+float forwardAcceleration = 500;
 
 Mtx skyboxTranslation;
 
@@ -99,16 +105,47 @@ void updateGame00() {
 
 
   float joystickMagnitude = sqrtf(contdata[0].stick_y * contdata[0].stick_y + contdata[0].stick_x * contdata[0].stick_x);
-  if (contdata[0].button & A_BUTTON && (forwardVelocity < forwardMax)){
-    forwardVelocity = forwardVelocity + forwardAcceleration;
+
+  if (contdata[0].button & A_BUTTON){
+    //forwardVelocity = forwardVelocity + forwardAcceleration;
+      playerVelocity.x += cameraForward.x * forwardAcceleration *.016;
+      playerVelocity.y += cameraForward.y * forwardAcceleration *.016;
+      playerVelocity.z += cameraForward.z * forwardAcceleration *.016;
+      //playerVelocity = applyInertDamp(cameraForward, playerVelocity, 75, 1);
+
   }
 
-  if (contdata[0].button & B_BUTTON && (forwardVelocity > forwardMin)){
-    forwardVelocity = forwardVelocity - forwardAcceleration;
+
+
+  if (contdata[0].button & B_BUTTON){
+    //forwardVelocity = forwardVelocity - forwardAcceleration;
+    playerVelocity.x += -1 * cameraForward.x * forwardAcceleration * .016;
+    playerVelocity.y += -1 * cameraForward.y * forwardAcceleration * .016;
+    playerVelocity.z += -1 * cameraForward.z * forwardAcceleration * .016;
+    //playerVelocity = applyInertDamp(cameraForward, playerVelocity, 75, -1);
+
   }
+
+  float velocityMagnitude = sqrtf(playerVelocity.x * playerVelocity.x + playerVelocity.y * playerVelocity.y
+                              + playerVelocity.z * playerVelocity.z);
+
+  if(velocityMagnitude > forwardMax){
+      Vec3d normalizedVelocity = {
+              playerVelocity.x / velocityMagnitude,
+              playerVelocity.y / velocityMagnitude,
+              playerVelocity.z / velocityMagnitude
+      };
+
+      playerVelocity.x = normalizedVelocity.x * forwardMax;
+      playerVelocity.y = normalizedVelocity.y * forwardMax;
+      playerVelocity.z = normalizedVelocity.z * forwardMax;
+  }
+
 
   if(contdata[0].button & U_CBUTTONS){
-      forwardVelocity = 0;
+      playerVelocity.x = 0;
+      playerVelocity.y = 0;
+      playerVelocity.z = 0;
   }
   roll = 0;
   if (contdata[0].button & L_CBUTTONS){
@@ -124,6 +161,7 @@ void updateGame00() {
         skyboxOn = skyboxOn * -1;
     }
   yaw = 0;
+
   int stick_x_mag = sqrtf(contdata[0].stick_x * contdata[0].stick_x);
   int stick_y_mag = sqrtf(contdata[0].stick_y * contdata[0].stick_y);
   if(contdata[0].stick_x !=0 && (stick_x_mag > 40)){
@@ -142,16 +180,26 @@ void updateGame00() {
   // update square rotations
 
 
-  cameraPos.x = cameraPos.x + (cameraForward.x * forwardVelocity * .016);
-  cameraPos.y = cameraPos.y + (cameraForward.y * forwardVelocity * .016);
-  cameraPos.z = cameraPos.z + (cameraForward.z * forwardVelocity * .016);
+  cameraPos.x = cameraPos.x + (playerVelocity.x * .016);
+  cameraPos.y = cameraPos.y + (playerVelocity.y * .016);
+  cameraPos.z = cameraPos.z + (playerVelocity.z * .016);
 
   //Detect collisions
 
   for(int i = 0; i < METEOR_COUNT; i++){
       float meteorRadius = MeteorList[i].radius * MeteorList[i].scale;
+      Vec3d meteorPosition = MeteorList[i].position;
       if(isColliding(50, meteorRadius, cameraPos, MeteorList[i].position)){
-          forwardVelocity = 0;
+          VelocityOut collisionOutput;
+          Vec3d zeroVelocity = {
+                  0.0f,
+                  0.0f,
+                  0.0f
+          };
+          collisionOutput = respondCollision(50, cameraPos, playerVelocity, 770, meteorRadius, meteorPosition,
+                                             zeroVelocity, 5000);
+
+          playerVelocity = collisionOutput.first;
       }
   }
 
@@ -161,6 +209,10 @@ void updateGame00() {
 
   updateMeteors();
 
+  //debug_printf("Velocity: %f %f %f \n", playerVelocity.x, playerVelocity.y, playerVelocity.z);
+  //debug_printf("Magnitude: %f Forward Max: %f\n", velocityMagnitude, forwardMax);
+
+  //debug_printf("Position: %f %f %f \n", cameraPos.x, cameraPos.y, cameraPos.z);
 }
 
 // the 'draw' function
@@ -358,5 +410,49 @@ void drawMeteors(){
         gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
 
     }
+}
 
+Vec3d applyInertDamp(Vec3d forward, Vec3d velocity, float rate, int forwardScale){
+
+    float velMag = sqrtf(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
+
+    if(velMag == 0){
+        velMag = 1;
+    }
+
+    //Scale the forward vector by the current velocity magnitude
+    Vec3d desiredVelocity = {
+        forwardScale * forward.x * velMag,
+        forwardScale * forward.y * velMag,
+        forwardScale * forward.z * velMag
+    };
+
+    //Take the difference between the two vectors
+    Vec3d difference = {
+            velocity.x - desiredVelocity.x,
+            velocity.y - desiredVelocity.y,
+            velocity.z - desiredVelocity.z
+    };
+
+    //normalize the difference then scale it by the rate
+    float difMag = sqrtf(difference.x * difference.x + difference.y * difference.y + difference.z * difference.z);
+
+    if(difMag == 0){
+        difMag = 1;
+    }
+
+    Vec3d change = {
+            (difference.x / difMag) * rate * .016,
+            (difference.y / difMag) * rate * .016,
+            (difference.z / difMag) * rate * .016
+    };
+
+    //update the input velocity
+    Vec3d output = {
+            velocity.x + change.x,
+            velocity.y + change.y,
+            velocity.z + change.z
+    };
+
+    return output;
 }
