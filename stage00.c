@@ -11,6 +11,8 @@
 #include "testcube.h"
 #include "meteor.h"
 #include "collisionmath.h"
+#include "projectile_texture.h"
+#include "projectile.h"
 
 Vec3d cameraPos = {0.0f, 0.0f, -50.0f};
 Vec3d cameraTarget = {0, 0, 0};
@@ -82,7 +84,7 @@ int test_rotations[METEOR_COUNT];
 
 Vec3d test_positions[METEOR_COUNT];
 
-
+Projectile projectiles[MAX_PROJECTILES];
 
 // the 'setup' function
 void initStage00() {  
@@ -95,6 +97,7 @@ void initStage00() {
   // must be declared at the top of a function or block scope. This is an example
   // of using block scope to declare a variable in the middle of a function.
   generateMeteors();
+  initialize_projectile_array(projectiles);
 
 }
 
@@ -191,13 +194,13 @@ void updateGame00() {
       Vec3d meteorPosition = MeteorList[i].position;
       if(isColliding(50, meteorRadius, cameraPos, MeteorList[i].position)){
           VelocityOut collisionOutput;
-          Vec3d zeroVelocity = {
-                  0.0f,
-                  0.0f,
-                  0.0f
+          Vec3d oppositeVelocity = {
+                  -1 * playerVelocity.x,
+                  -1 * playerVelocity.y,
+                  -1 * playerVelocity.z
           };
           collisionOutput = respondCollision(50, cameraPos, playerVelocity, 770, meteorRadius, meteorPosition,
-                                             zeroVelocity, 5000);
+                                             oppositeVelocity, 5000);
 
           playerVelocity = collisionOutput.first;
       }
@@ -307,7 +310,7 @@ void makeDL00() {
     }
     gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
 
-
+    gSPDisplayList(displayListPtr++, projectile_dl);
 
     drawMeteors();
 
