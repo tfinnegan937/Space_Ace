@@ -37,14 +37,21 @@ unsigned short projectile_texture[] = {
 #define TEXTURE_BRIGHTy 15 << 6
 
 Vtx projectile_vertex[] = {
-        {-1, 1, 0, 0, TEXTURE_TLEFTx, TEXTURE_TLEFTy, 0x0, 0xFF, 0x0, 0xFF},
-        {1, 1, 0, 0, TEXTURE_TRIGHTx, TEXTURE_TRIGHTy, 0x0, 0xFF, 0x0, 0xFF},
-        {1, -1, 0, 0, TEXTURE_BRIGHTx, TEXTURE_BRIGHTy, 0x0, 0xFF, 0x0, 0xFF},
-        {-1, -1, 0, 0, TEXTURE_BLEFTx, TEXTURE_BLEFTy, 0x0, 0xFF, 0x0, 0xFF},
+        {-2, 2, 0, 0, TEXTURE_TLEFTx, TEXTURE_TLEFTy, 0x0, 0xFF, 0x0, 0xFF},
+        {2, 2, 0, 0, TEXTURE_TRIGHTx, TEXTURE_TRIGHTy, 0x0, 0xFF, 0x0, 0xFF},
+        {2, -2, 0, 0, TEXTURE_BRIGHTx, TEXTURE_BRIGHTy, 0x0, 0xFF, 0x0, 0xFF},
+        {-2, -2, 0, 0, TEXTURE_BLEFTx, TEXTURE_BLEFTy, 0x0, 0xFF, 0x0, 0xFF},
+        {-2, 0, 2, 0, TEXTURE_TLEFTx, TEXTURE_TLEFTy, 0x0, 0xFF, 0x0, 0xFF},
+        {2, 0, 2, 0, TEXTURE_TRIGHTx, TEXTURE_TRIGHTy, 0x0, 0xFF, 0x0, 0xFF},
+        {2, 0, -2, 0, TEXTURE_BRIGHTx, TEXTURE_BRIGHTy, 0x0, 0xFF, 0x0, 0xFF},
+        {-2, 0, -2, 0, TEXTURE_BLEFTx, TEXTURE_BLEFTy, 0x0, 0xFF, 0x0, 0xFF},
 };
 
 Gfx projectile_triangle[] = {
         gsSPVertex(projectile_vertex + 0 , 4, 0),
+        gsSP1Triangle(0, 1, 3, 0),
+        gsSP1Triangle(3, 2, 1, 0),
+        gsSPVertex(projectile_vertex + 4 , 4, 0),
         gsSP1Triangle(0, 1, 3, 0),
         gsSP1Triangle(3, 2, 1, 0),
         gsSPEndDisplayList(),

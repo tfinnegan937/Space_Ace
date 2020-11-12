@@ -274,5 +274,7 @@ struct Meteor{
     int rotation_angle;
     int scale;
     float radius;
+    int enabled;
+    int health;
 };
 #endif //SPACE_ACE_METEOR_H

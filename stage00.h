@@ -3,6 +3,10 @@
 #define _STAGE00_H_
 
 #include "graphic.h"
+#include "projectile.h"
+
+//#include "projectile.h"
+void draw_projectiles(Projectile * projectiles);
 
 void stage00(int);
 void initStage00();
@@ -18,7 +22,9 @@ void generateMeteors();
 void updateMeteors();
 void drawMeteors();
 
+
 Vec3d applyInertDamp(Vec3d forward, Vec3d velocity, float rate, int forwardScale);
+
 
 #endif /* _STAGE00_H_ */
 

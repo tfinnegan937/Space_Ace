@@ -22,9 +22,9 @@ APP =		spaceace.out
 
 TARGETS =	spaceace.n64
 
-HFILES =	graphic.h speaker.h space_texture_test.h
+HFILES =	graphic.h speaker.h space_texture_test.h projectile.h
 
-CODEFILES   = 	main.c stage00.c graphic.c gfxinit.c debug.c usb.c
+CODEFILES   = 	main.c stage00.c graphic.c gfxinit.c debug.c usb.c projectile.c
 
 CODEOBJECTS =	$(CODEFILES:.c=.o)  $(NUSYSLIBDIR)/nusys.o
 

@@ -12,8 +12,6 @@
 #include "meteor.h"
 #include "collisionmath.h"
 #include "projectile_texture.h"
-#include "projectile.h"
-
 Vec3d cameraPos = {0.0f, 0.0f, -50.0f};
 Vec3d cameraTarget = {0, 0, 0};
 Vec3d cameraForward = {0.0f, 0.0f, 1.0f};
@@ -85,6 +83,7 @@ int test_rotations[METEOR_COUNT];
 Vec3d test_positions[METEOR_COUNT];
 
 Projectile projectiles[MAX_PROJECTILES];
+int projectile_count = 0;
 
 // the 'setup' function
 void initStage00() {  
@@ -160,9 +159,10 @@ void updateGame00() {
     roll = 1;
     rollDirection = 1;
   }
-    if(contdata[0].trigger & D_CBUTTONS){
-        skyboxOn = skyboxOn * -1;
-    }
+  if(contdata[0].trigger & Z_TRIG){
+
+      fire_projectile(cameraPos, cameraForward, projectiles, &projectile_count);
+  }
   yaw = 0;
 
   int stick_x_mag = sqrtf(contdata[0].stick_x * contdata[0].stick_x);
@@ -192,17 +192,41 @@ void updateGame00() {
   for(int i = 0; i < METEOR_COUNT; i++){
       float meteorRadius = MeteorList[i].radius * MeteorList[i].scale;
       Vec3d meteorPosition = MeteorList[i].position;
-      if(isColliding(50, meteorRadius, cameraPos, MeteorList[i].position)){
-          VelocityOut collisionOutput;
-          Vec3d oppositeVelocity = {
-                  -1 * playerVelocity.x,
-                  -1 * playerVelocity.y,
-                  -1 * playerVelocity.z
-          };
-          collisionOutput = respondCollision(50, cameraPos, playerVelocity, 770, meteorRadius, meteorPosition,
-                                             oppositeVelocity, 5000);
+      if(MeteorList[i].enabled == 1) {
+          if (isColliding(50, meteorRadius, cameraPos, MeteorList[i].position)) {
+              VelocityOut collisionOutput;
+              Vec3d oppositeVelocity = {
+                      -1 * playerVelocity.x,
+                      -1 * playerVelocity.y,
+                      -1 * playerVelocity.z
+              };
+              collisionOutput = respondCollision(50, cameraPos, playerVelocity, 770, meteorRadius, meteorPosition,
+                                                 oppositeVelocity, 5000);
 
-          playerVelocity = collisionOutput.first;
+              playerVelocity = collisionOutput.first;
+          }
+      }
+  }
+
+  //Detect projectile-meteor collisions, update health data
+  for(int i = 0; i < MAX_PROJECTILES; i++){
+      for(int j = 0; j < METEOR_COUNT; j++){
+
+          if(projectiles[i].isEliminated == 1 || MeteorList[j].enabled == 0){ //Calculate nothing if either is disabled
+              continue;
+          }
+
+          if(isColliding(projectiles[i].radius, MeteorList[j].radius, projectiles[i].pos, MeteorList[j].position)){
+              projectiles[i].isEliminated = 1;
+              MeteorList[j].health = MeteorList[j].health - 2;
+              debug_printf("Meteor %i hit\n", j);
+              debug_printf("Meteor %i health: %i\n", j, MeteorList[j].health);
+
+              if(MeteorList[j].health <= 0){
+                  MeteorList[j].enabled = 0;
+                  debug_printf("Meteor %i destroyed\n", j);
+              }
+          }
       }
   }
 
@@ -212,6 +236,7 @@ void updateGame00() {
 
   updateMeteors();
 
+  handle_projectiles(projectiles, cameraForward, cameraPos, &projectile_count);
   //debug_printf("Velocity: %f %f %f \n", playerVelocity.x, playerVelocity.y, playerVelocity.z);
   //debug_printf("Magnitude: %f Forward Max: %f\n", velocityMagnitude, forwardMax);
 
@@ -310,9 +335,12 @@ void makeDL00() {
     }
     gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
 
-    gSPDisplayList(displayListPtr++, projectile_dl);
+    //gSPDisplayList(displayListPtr++, projectile_dl);
+
+
 
     drawMeteors();
+    draw_projectiles(projectiles);
 
     gDPPipeSync(displayListPtr++);
     //debug_printf("%i FPS\n", nuScGetFrameRate());
@@ -374,6 +402,8 @@ void generateMeteors(){
         MeteorList[i].rotation_angle = 13;
         MeteorList[i].scale = RAND(3);
         MeteorList[i].radius = 215;
+        MeteorList[i].enabled = 1;
+        MeteorList[i].health = 10 * MeteorList[i].scale;
         //debug_printf("Angle of rotation: %i\n", test_rotations[i]);
         //debug_printf("X: %f\n", test_positions[i].x);
 
@@ -397,20 +427,21 @@ void drawMeteors(){
         struct Meteor curMeteor = MeteorList[i];
 
 
+        if(MeteorList[i].enabled == 1) {
+            //debug_printf("X: %f Y: %f Z %f \n", curMeteor.x, curMeteor.y, curMeteor.z);
+            //debug_printf("Angle of rotation: %f\n", curMeteor.rotation_angle);
 
-        //debug_printf("X: %f Y: %f Z %f \n", curMeteor.x, curMeteor.y, curMeteor.z);
-        //debug_printf("Angle of rotation: %f\n", curMeteor.rotation_angle);
+            int rotation_x = curMeteor.Turning_Axis.x * curMeteor.rotation_angle;
+            int rotation_y = curMeteor.Turning_Axis.y * curMeteor.rotation_angle;
+            int rotation_z = curMeteor.Turning_Axis.z * curMeteor.rotation_angle;
 
-        int rotation_x = curMeteor.Turning_Axis.x * curMeteor.rotation_angle;
-        int rotation_y = curMeteor.Turning_Axis.y * curMeteor.rotation_angle;
-        int rotation_z = curMeteor.Turning_Axis.z * curMeteor.rotation_angle;
+            guPosition(&MeteorTransformationStack[i], rotation_x, rotation_y, rotation_z, curMeteor.scale,
+                       curMeteor.position.x, curMeteor.position.y, curMeteor.position.z);
+            gSPMatrix(displayListPtr++, OS_K0_TO_PHYSICAL(&MeteorTransformationStack[i]), G_MTX_MODELVIEW | G_MTX_PUSH);
+            gSPDisplayList(displayListPtr++, asteroid_Sphere_mesh);
 
-        guPosition(&MeteorTransformationStack[i], rotation_x, rotation_y, rotation_z, curMeteor.scale,
-                   curMeteor.position.x, curMeteor.position.y, curMeteor.position.z);
-        gSPMatrix(displayListPtr++, OS_K0_TO_PHYSICAL(&MeteorTransformationStack[i]), G_MTX_MODELVIEW | G_MTX_PUSH);
-        gSPDisplayList(displayListPtr++, asteroid_Sphere_mesh);
-
-        gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
+            gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
+        }
 
     }
 }
@@ -458,4 +489,26 @@ Vec3d applyInertDamp(Vec3d forward, Vec3d velocity, float rate, int forwardScale
     };
 
     return output;
+}
+
+void draw_projectiles(Projectile * projectiles){
+
+    for(int i = 0; i < MAX_PROJECTILES; i++){
+        if(!projectiles[i].isEliminated) {
+            gSPMatrix(displayListPtr++, OS_K0_TO_PHYSICAL(&(projectiles[i].translation)), G_MTX_MODELVIEW | G_MTX_PUSH
+                                                                                          | G_MTX_MUL);
+
+            //gSPMatrix(displayListPtr++, OS_K0_TO_PHYSICAL(&(projectiles[i].transform)), G_MTX_MODELVIEW | G_MTX_PUSH
+            //| G_MTX_MUL);
+
+
+            gSPDisplayList(displayListPtr++, projectile_dl);
+
+            gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
+            //gSPPopMatrix(displayListPtr++, G_MTX_MODELVIEW);
+
+        }
+
+    }
+
 }
