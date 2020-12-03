@@ -12,6 +12,13 @@
 #include "meteor.h"
 #include "collisionmath.h"
 #include "projectile_texture.h"
+
+#define PLAYER_HEALTH_MAX 7
+#define DAMAGE_TIMER_MAX 2 //Number of seconds between damage pings
+int playerHealth = PLAYER_HEALTH_MAX; //Number of available hearts
+float damageTimer = 0.0f;
+int damageTimerActive = 0; //Boolean (N64 does not support bool). Determines whether the damage cooldown is active
+
 Vec3d cameraPos = {0.0f, 0.0f, -50.0f};
 Vec3d cameraTarget = {0, 0, 0};
 Vec3d cameraForward = {0.0f, 0.0f, 1.0f};
@@ -74,6 +81,8 @@ Mtx curMeteorRotation;
 Mtx curMeteorTranslation;
 
 #define METEOR_COUNT 100
+int curMeteorCount = METEOR_COUNT;
+
 struct Meteor MeteorList[METEOR_COUNT];
 
 Mtx MeteorTransformationStack[METEOR_COUNT];
@@ -84,6 +93,8 @@ Vec3d test_positions[METEOR_COUNT];
 
 Projectile projectiles[MAX_PROJECTILES];
 int projectile_count = 0;
+
+int score = 0;
 
 // the 'setup' function
 void initStage00() {  
@@ -105,6 +116,17 @@ void updateGame00() {
   // read controller input from controller 1 (index 0)
   nuContDataGetEx(contdata, 0);
 
+  //Re-Generate meteors if all are destroyed
+  if(curMeteorCount <= 0){
+      generateMeteors();
+      curMeteorCount = METEOR_COUNT;
+  }
+
+  //Check the damage cooldown timer
+  if(damageTimerActive == 1 && damageTimer >= DAMAGE_TIMER_MAX){
+      damageTimerActive = 0;
+      damageTimer = 0.0f;
+  }
 
   float joystickMagnitude = sqrtf(contdata[0].stick_y * contdata[0].stick_y + contdata[0].stick_x * contdata[0].stick_x);
 
@@ -204,6 +226,11 @@ void updateGame00() {
                                                  oppositeVelocity, 5000);
 
               playerVelocity = collisionOutput.first;
+
+              if(damageTimerActive == 0){
+                  playerHealth = playerHealth - 1;
+                  damageTimerActive = 1;
+              }
           }
       }
   }
@@ -224,7 +251,11 @@ void updateGame00() {
 
               if(MeteorList[j].health <= 0){
                   MeteorList[j].enabled = 0;
+                  curMeteorCount = curMeteorCount - 1;
+                  score = 100 * MeteorList[j].scale;
                   debug_printf("Meteor %i destroyed\n", j);
+                  debug_printf("Score\n", j);
+
               }
           }
       }
@@ -379,9 +410,11 @@ void stage00(int pendingGfx)
 {
   // produce a new displaylist (unless we're running behind, meaning we already
   // have the maximum queued up)
-  if(pendingGfx < 1)
-    makeDL00();
-
+  if(pendingGfx < 1 && playerHealth > 0) {
+      makeDL00();
+  }else{
+      //TODO GameOver screen
+  }
   // update the state of the world for the next frame
   updateGame00();
 }
